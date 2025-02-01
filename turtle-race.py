@@ -247,7 +247,16 @@ class TurtleRaceGUI:
         finish_line.color("white")
         finish_line.forward(300)
 
-        # Obtener solo las tortugas seleccionadas por los jugadores
+        # Diccionario para nombres de tortugas
+        ninja_names = {
+            "#0000CD": "Leonardo (Azul)",
+            "#FF0000": "Raphael (Rojo)",
+            "#FFA500": "Michelangelo (Naranja)",
+            "#800080": "Donatello (Morado)",
+            "#8B4513": "Splinter (Marrón)",
+        }
+
+        # Obtener colores únicos seleccionados
         selected_colors = set(
             player_info["bet"] for player_info in self.players.values()
         )
@@ -255,42 +264,59 @@ class TurtleRaceGUI:
         # Crear las tortugas seleccionadas
         turtles = []
         starting_pos = -screen.window_width() / 2 + 20
-        spacing = 300 / (
-            len(selected_colors) + 1
-        )  # Distribuir el espacio equitativamente
+        spacing = 300 / (len(selected_colors) + 1)
 
         for i, color in enumerate(selected_colors):
             new_turtle = turtle.Turtle(shape="turtle")
             new_turtle.color(color)
-            new_turtle.shapesize(2, 2)  # Hacer las tortugas más grandes
+            new_turtle.shapesize(2, 2)
             new_turtle.penup()
-            # Ajustar la posición vertical según el número de tortugas
             y_pos = 100 - (i * spacing)
             new_turtle.goto(starting_pos, y_pos)
-            turtles.append(new_turtle)
+            # Guardamos la tortuga junto con su nombre
+            turtles.append((ninja_names[color], new_turtle))
 
         # Carrera
-        winner = None
-        while winner is None:
-            for t in turtles:
+        winner_name = None
+        winner_turtle = None
+
+        while winner_name is None:
+            for name, t in turtles:
                 t.forward(random.randint(1, 10))
                 if t.xcor() >= screen.window_width() / 2 - 20:
-                    winner = t.color()[0]
+                    winner_name = name
+                    winner_turtle = t
                     break
+            if winner_name:
+                break
 
         # Mostrar resultados
         results = "Resultados de la Carrera:\n\n"
+        results += f"🏆 ¡{winner_name} HA GANADO LA CARRERA! 🏆\n\n"
+
+        # Primero mostramos los ganadores
+        results += "🌟 GANADORES 🌟\n"
+        has_winners = False
         for player_name, player_info in self.players.items():
-            if player_info["bet"] == winner:
-                winnings = player_info["bet_amount"] * 3
+            tortuga_apostada = ninja_names[player_info["bet"]]
+            if tortuga_apostada == winner_name:
+                has_winners = True
+                winnings = player_info["bet_amount"] * 2
+                total_winnings = player_info["bet_amount"] + winnings
                 player_info["balance"] += winnings
-                results += f"¡{player_name} ha ganado {winnings} monedas!\n"
-                results += f"Balance final: {player_info['balance']} monedas\n\n"
-            else:
-                player_info["balance"] -= player_info["bet_amount"]
+                results += f"¡{player_name} apostó a {winner_name} y ganó {total_winnings} monedas!\n"
                 results += (
-                    f"{player_name} ha perdido {player_info['bet_amount']} monedas\n"
+                    f"(Apuesta: {player_info['bet_amount']} + Premio: {winnings})\n"
                 )
+                results += f"Balance final: {player_info['balance']} monedas\n\n"
+
+        # Luego mostramos los perdedores
+        results += "❌ PERDEDORES ❌\n"
+        for player_name, player_info in self.players.items():
+            tortuga_apostada = ninja_names[player_info["bet"]]
+            if tortuga_apostada != winner_name:
+                player_info["balance"] -= player_info["bet_amount"]
+                results += f"{player_name} apostó a {tortuga_apostada} y perdió {player_info['bet_amount']} monedas\n"
                 results += f"Balance final: {player_info['balance']} monedas\n\n"
 
         messagebox.showinfo("¡Fin de la Carrera!", results)
