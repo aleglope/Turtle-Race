@@ -212,14 +212,35 @@ class TurtleRaceGUI:
 
     def play_next_round(self):
         """
-        Comprueba si se deben jugar más rondas: se continúa si
-          - Quedan rondas por jugar, y
-          - Existe al menos un jugador con balance positivo.
+        Comprueba si se deben jugar más rondas:
+          - Si sólo queda un jugador con saldo positivo se declara ganador.
+          - Si no hay jugadores con saldo, se finaliza el juego.
+          - En caso contrario, se continúa la ronda.
         """
         active_players = [
             p for p in self.players_order if self.players[p]["balance"] > 0
         ]
-        if self.current_round < self.total_rounds and active_players:
+
+        # Si sólo queda un jugador con monedas, lo declaramos ganador
+        if len(active_players) == 1:
+            winner = active_players[0]
+            messagebox.showinfo(
+                "Ganador Definitivo",
+                f"¡{winner} es el único ninja con monedas restantes y es el ganador definitivo!",
+            )
+            self.show_final_results()
+            return
+
+        # Si no hay jugadores activos, terminamos el juego
+        if not active_players:
+            messagebox.showinfo(
+                "Juego Terminado", "Todos los jugadores se han quedado sin monedas."
+            )
+            self.show_final_results()
+            return
+
+        # Si aún quedan rondas por jugar, continuar
+        if self.current_round < self.total_rounds:
             self.current_round += 1
             messagebox.showinfo(
                 "Nueva Ronda",
