@@ -140,7 +140,7 @@ class TurtleRaceGUI:
             # Título
             ttk.Label(
                 self.main_frame,
-                text=f"Registro del Jugador {self.current_player + 1}",
+                text=f"Registro del Ninja {self.current_player + 1}",
                 style="Title.TLabel",
             ).grid(row=0, column=0, pady=20)
 
@@ -148,12 +148,16 @@ class TurtleRaceGUI:
             form_frame = ttk.Frame(self.main_frame)
             form_frame.grid(row=1, column=0, pady=20)
 
-            ttk.Label(form_frame, text="Nombre:").grid(row=0, column=0, pady=5, padx=5)
+            # Nombre
+            ttk.Label(form_frame, text="Nombre del Ninja:").grid(
+                row=0, column=0, pady=5, padx=5
+            )
             name_var = tk.StringVar()
             name_entry = ttk.Entry(form_frame, textvariable=name_var, width=20)
             name_entry.grid(row=0, column=1, pady=5, padx=5)
 
-            ttk.Label(form_frame, text="Color de tortuga:").grid(
+            # Color
+            ttk.Label(form_frame, text="Elige tu Tortuga:").grid(
                 row=1, column=0, pady=5, padx=5
             )
             color_var = tk.StringVar()
@@ -165,26 +169,55 @@ class TurtleRaceGUI:
             ]
             color_combo.grid(row=1, column=1, pady=5, padx=5)
 
+            # Apuesta
+            ttk.Label(form_frame, text="Cantidad a apostar:").grid(
+                row=2, column=0, pady=5, padx=5
+            )
+            bet_var = tk.StringVar()
+            bet_entry = ttk.Entry(form_frame, textvariable=bet_var, width=20)
+            bet_entry.grid(row=2, column=1, pady=5, padx=5)
+
+            # Mostrar balance inicial
+            ttk.Label(
+                form_frame, text="Balance inicial: 500 monedas", foreground="#FFD700"
+            ).grid(row=3, column=0, columnspan=2, pady=10)
+
             ttk.Button(
                 self.main_frame,
-                text="Registrar Jugador",
-                command=lambda: self.register_player(name_var.get(), color_var.get()),
+                text="¡Unirse a la carrera!",
+                command=lambda: self.register_player(
+                    name_var.get(), color_var.get(), bet_var.get()
+                ),
             ).grid(row=2, column=0, pady=20)
         else:
             self.start_race()
 
-    def register_player(self, name, color_esp):
+    def register_player(self, name, color_esp, bet_amount):
         """Registrar un jugador"""
-        if not name or not color_esp:
+        if not name or not color_esp or not bet_amount:
             messagebox.showerror("Error", "Por favor complete todos los campos")
+            return
+
+        try:
+            bet = int(bet_amount)
+            if bet <= 0:
+                messagebox.showerror("Error", "La apuesta debe ser mayor a 0")
+                return
+            if bet > 500:
+                messagebox.showerror(
+                    "Error", "La apuesta no puede superar tu balance inicial de 500"
+                )
+                return
+        except ValueError:
+            messagebox.showerror("Error", "La apuesta debe ser un número válido")
             return
 
         color = self.color_mapping[color_esp]
         if color not in self.available_colors:
-            messagebox.showerror("Error", "Color no disponible")
+            messagebox.showerror("Error", "Tortuga no disponible")
             return
 
-        self.players[name] = {"balance": 500, "bet": color}
+        self.players[name] = {"balance": 500, "bet": color, "bet_amount": bet}
         self.available_colors.remove(color)
         self.current_player += 1
 
@@ -214,15 +247,26 @@ class TurtleRaceGUI:
         finish_line.color("white")
         finish_line.forward(300)
 
-        # Crear las tortugas
+        # Obtener solo las tortugas seleccionadas por los jugadores
+        selected_colors = set(
+            player_info["bet"] for player_info in self.players.values()
+        )
+
+        # Crear las tortugas seleccionadas
         turtles = []
         starting_pos = -screen.window_width() / 2 + 20
-        for i, (name, color) in enumerate(self.color_mapping.items()):
+        spacing = 300 / (
+            len(selected_colors) + 1
+        )  # Distribuir el espacio equitativamente
+
+        for i, color in enumerate(selected_colors):
             new_turtle = turtle.Turtle(shape="turtle")
             new_turtle.color(color)
             new_turtle.shapesize(2, 2)  # Hacer las tortugas más grandes
             new_turtle.penup()
-            new_turtle.goto(starting_pos, 100 - i * 50)
+            # Ajustar la posición vertical según el número de tortugas
+            y_pos = 100 - (i * spacing)
+            new_turtle.goto(starting_pos, y_pos)
             turtles.append(new_turtle)
 
         # Carrera
@@ -235,17 +279,21 @@ class TurtleRaceGUI:
                     break
 
         # Mostrar resultados
-        results = "Resultados:\n\n"
-        bet_amount = 100
+        results = "Resultados de la Carrera:\n\n"
         for player_name, player_info in self.players.items():
             if player_info["bet"] == winner:
-                player_info["balance"] += bet_amount * 5
-                results += f"¡{player_name} ha ganado! Nueva balance: {player_info['balance']} monedas\n"
+                winnings = player_info["bet_amount"] * 3
+                player_info["balance"] += winnings
+                results += f"¡{player_name} ha ganado {winnings} monedas!\n"
+                results += f"Balance final: {player_info['balance']} monedas\n\n"
             else:
-                player_info["balance"] -= bet_amount
-                results += f"{player_name} ha perdido. Nueva balance: {player_info['balance']} monedas\n"
+                player_info["balance"] -= player_info["bet_amount"]
+                results += (
+                    f"{player_name} ha perdido {player_info['bet_amount']} monedas\n"
+                )
+                results += f"Balance final: {player_info['balance']} monedas\n\n"
 
-        messagebox.showinfo("Resultados de la carrera", results)
+        messagebox.showinfo("¡Fin de la Carrera!", results)
         screen.bye()
         self.root.quit()
 
