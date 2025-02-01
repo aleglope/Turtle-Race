@@ -17,24 +17,28 @@ class TurtleRaceGUI:
         y = (screen_height - 700) // 2
         self.root.geometry(f"600x700+{x}+{y}")
 
-        # Configuración de estilos
+        # Configuración de estilos inspirados en las Tortugas Ninja
         self.style = ttk.Style()
         self.style.configure("TFrame", background="#2E8B57")
         self.style.configure(
             "TLabel",
             background="#2E8B57",
-            font=("Comic Sans MS", 12),
+            font=("Comic Sans MS", 12, "bold"),
             foreground="white",
+            anchor="center",
+            justify="center",
+            padding=10,
         )
-        self.style.configure("TButton", font=("Comic Sans MS", 11), padding=10)
+        self.style.configure("TButton", font=("Comic Sans MS", 11, "bold"), padding=10)
         self.style.configure(
             "Title.TLabel",
-            font=("Comic Sans MS", 18, "bold"),
-            foreground="#FFD700",
-            padding=20,
+            font=("Comic Sans MS", 20, "bold"),
+            foreground="#FFD700",  # Dorado
             background="#2E8B57",
+            anchor="center",
+            justify="center",
+            padding=20,
         )
-        self.root.configure(bg="#2E8B57")
 
         # Mapeo de tortugas: nombre visible -> código de color
         self.color_mapping = {
@@ -67,17 +71,31 @@ class TurtleRaceGUI:
         for widget in self.main_frame.winfo_children():
             widget.destroy()
 
+        # Título grande y centrado
         title_label = ttk.Label(
             self.main_frame,
             text="¡Cowabunga! Carrera de Tortugas Ninja",
             style="Title.TLabel",
         )
-        title_label.grid(row=0, column=0, pady=20)
+        title_label.grid(row=0, column=0, pady=10)
 
-        # Número de jugadores
-        ttk.Label(
-            self.main_frame, text="¿Cuántos ninjas participarán en la carrera?"
-        ).grid(row=1, column=0, pady=10)
+        # Subtítulo ambientado
+        subtitle_label = ttk.Label(
+            self.main_frame,
+            text="¡Prepárate, Ninja! Selecciona tu equipo y demuestra tu valía en la carrera.",
+            wraplength=500,
+            justify="center",
+        )
+        subtitle_label.grid(row=1, column=0, pady=10)
+
+        # Preguntar por el número de jugadores
+        question_players = ttk.Label(
+            self.main_frame,
+            text="¿Cuántos ninjas participarán en la carrera?",
+            justify="center",
+        )
+        question_players.grid(row=2, column=0, pady=5)
+
         self.num_players_var = tk.StringVar()
         num_players_entry = ttk.Entry(
             self.main_frame,
@@ -85,12 +103,14 @@ class TurtleRaceGUI:
             width=10,
             justify="center",
         )
-        num_players_entry.grid(row=2, column=0, pady=5)
+        num_players_entry.grid(row=3, column=0, pady=5)
 
-        # Número total de partidas (rondas)
-        ttk.Label(self.main_frame, text="Número total de partidas:").grid(
-            row=3, column=0, pady=10
+        # Preguntar por el número total de partidas (rondas)
+        question_rounds = ttk.Label(
+            self.main_frame, text="Número total de partidas:", justify="center"
         )
+        question_rounds.grid(row=4, column=0, pady=5)
+
         self.num_rounds_var = tk.StringVar()
         num_rounds_entry = ttk.Entry(
             self.main_frame,
@@ -98,14 +118,14 @@ class TurtleRaceGUI:
             width=10,
             justify="center",
         )
-        num_rounds_entry.grid(row=4, column=0, pady=5)
+        num_rounds_entry.grid(row=5, column=0, pady=5)
 
         start_button = ttk.Button(
             self.main_frame,
             text="Comenzar registro",
             command=self.start_player_registration,
         )
-        start_button.grid(row=5, column=0, pady=20)
+        start_button.grid(row=6, column=0, pady=20)
 
     def start_player_registration(self):
         """Inicia el proceso de registro de jugadores y define el total de partidas."""
@@ -150,14 +170,16 @@ class TurtleRaceGUI:
             )
             title_label.grid(row=0, column=0, pady=20)
 
-            form_frame = ttk.Frame(self.main_frame)
+            form_frame = ttk.Frame(self.main_frame, style="TFrame")
             form_frame.grid(row=1, column=0, pady=20)
 
             ttk.Label(form_frame, text="Nombre del Ninja:").grid(
                 row=0, column=0, pady=5, padx=5
             )
             name_var = tk.StringVar()
-            name_entry = ttk.Entry(form_frame, textvariable=name_var, width=20)
+            name_entry = ttk.Entry(
+                form_frame, textvariable=name_var, width=20, justify="center"
+            )
             name_entry.grid(row=0, column=1, pady=5, padx=5)
 
             ttk.Button(
@@ -238,11 +260,13 @@ class TurtleRaceGUI:
             title_label.grid(row=0, column=0, pady=20)
 
             info_label = ttk.Label(
-                self.main_frame, text=f"Balance actual: {balance} monedas"
+                self.main_frame,
+                text=f"Balance actual: {balance} monedas",
+                justify="center",
             )
             info_label.grid(row=1, column=0, pady=10)
 
-            form_frame = ttk.Frame(self.main_frame)
+            form_frame = ttk.Frame(self.main_frame, style="TFrame")
             form_frame.grid(row=2, column=0, pady=20)
 
             # Selección de tortuga (se muestran sólo las disponibles para esta ronda)
@@ -251,7 +275,11 @@ class TurtleRaceGUI:
             )
             turtle_var = tk.StringVar()
             turtle_combo = ttk.Combobox(
-                form_frame, textvariable=turtle_var, width=20, state="readonly"
+                form_frame,
+                textvariable=turtle_var,
+                width=20,
+                state="readonly",
+                justify="center",
             )
             turtle_combo["values"] = self.available_turtles_round
             turtle_combo.grid(row=0, column=1, pady=5, padx=5)
@@ -261,7 +289,9 @@ class TurtleRaceGUI:
                 row=1, column=0, pady=5, padx=5
             )
             bet_var = tk.StringVar()
-            bet_entry = ttk.Entry(form_frame, textvariable=bet_var, width=20)
+            bet_entry = ttk.Entry(
+                form_frame, textvariable=bet_var, width=20, justify="center"
+            )
             bet_entry.grid(row=1, column=1, pady=5, padx=5)
 
             ttk.Button(
