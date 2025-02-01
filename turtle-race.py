@@ -3,31 +3,13 @@ import random
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-"""
-    The Python code simulates a turtle race game where players place bets on turtle colors and the
-    program determines the winner, updating player balances accordingly.
-    
-    :param player_name: player_name is a variable that stores the name of a player participating in a
-    turtle racing game
-    :param available_colors: The `available_colors` variable is a list that contains the colors
-    available for the players to choose from in the turtle race game. Initially, it includes all the
-    colors in English ("red", "green", "blue", "orange", "purple"). As players place their bets on
-    specific colors, those
-    :return: The code provided is a Python program that simulates a turtle race game where players can
-    place bets on different colored turtles. The program initializes player balances, allows players to
-    place bets on turtle colors, creates a race track with turtle graphics, moves the turtles randomly,
-    determines the winner turtle, updates player balances based on the race outcome, and displays the
-    results.
-    """
-
 
 class TurtleRaceGUI:
     def __init__(self):
-        # Configuración inicial
+        # Configuración inicial de la ventana principal
         self.root = tk.Tk()
         self.root.title("¡Carrera de Tortugas Ninja!")
         self.root.geometry("600x700")
-
         # Centrar la ventana en la pantalla
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -35,11 +17,9 @@ class TurtleRaceGUI:
         y = (screen_height - 700) // 2
         self.root.geometry(f"600x700+{x}+{y}")
 
-        # Configurar estilo
+        # Configuración de estilos
         self.style = ttk.Style()
-        self.style.configure(
-            "TFrame", background="#2E8B57"
-        )  # Verde oscuro para el fondo
+        self.style.configure("TFrame", background="#2E8B57")
         self.style.configure(
             "TLabel",
             background="#2E8B57",
@@ -50,39 +30,43 @@ class TurtleRaceGUI:
         self.style.configure(
             "Title.TLabel",
             font=("Comic Sans MS", 18, "bold"),
-            foreground="#FFD700",  # Dorado para el título
+            foreground="#FFD700",
             padding=20,
             background="#2E8B57",
         )
-
-        # Configurar colores
         self.root.configure(bg="#2E8B57")
 
+        # Mapeo de tortugas: nombre visible -> código de color
         self.color_mapping = {
-            "Leonardo (Azul)": "#0000CD",  # Azul
-            "Raphael (Rojo)": "#FF0000",  # Rojo
-            "Michelangelo (Naranja)": "#FFA500",  # Naranja
-            "Donatello (Morado)": "#800080",  # Morado
-            "Splinter (Marrón)": "#8B4513",  # Marrón
+            "Leonardo (Azul)": "#0000CD",
+            "Raphael (Rojo)": "#FF0000",
+            "Michelangelo (Naranja)": "#FFA500",
+            "Donatello (Morado)": "#800080",
+            "Splinter (Marrón)": "#8B4513",
         }
 
+        # Diccionario para jugadores (persisten a lo largo de las rondas)
+        # Cada entrada tendrá: { "balance": int }
         self.players = {}
-        self.available_colors = list(self.color_mapping.values())
+        self.players_order = []  # Para mantener el orden de registro
 
-        # Crear el frame principal con padding y borde
+        # Variables para las rondas del juego
+        self.total_rounds = 0
+        self.current_round = 0
+
+        # Frame principal de la interfaz
         self.main_frame = ttk.Frame(self.root, padding="20", style="TFrame")
         self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-
-        # Configurar grid
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        self.main_frame.columnconfigure(0, weight=1)
 
         self.setup_initial_screen()
 
     def setup_initial_screen(self):
-        """Configurar la pantalla inicial para número de jugadores"""
-        # Título
+        """Pantalla inicial para definir número de jugadores y partidas."""
+        for widget in self.main_frame.winfo_children():
+            widget.destroy()
+
         title_label = ttk.Label(
             self.main_frame,
             text="¡Cowabunga! Carrera de Tortugas Ninja",
@@ -90,65 +74,85 @@ class TurtleRaceGUI:
         )
         title_label.grid(row=0, column=0, pady=20)
 
-        # Instrucciones
+        # Número de jugadores
         ttk.Label(
-            self.main_frame,
-            text="¿Cuántos ninjas participarán en la carrera?",
-            wraplength=400,
-            justify="center",
+            self.main_frame, text="¿Cuántos ninjas participarán en la carrera?"
         ).grid(row=1, column=0, pady=10)
-
-        # Frame para entrada y botón
-        entry_frame = ttk.Frame(self.main_frame)
-        entry_frame.grid(row=2, column=0, pady=20)
-
         self.num_players_var = tk.StringVar()
         num_players_entry = ttk.Entry(
-            entry_frame, textvariable=self.num_players_var, width=10, justify="center"
+            self.main_frame,
+            textvariable=self.num_players_var,
+            width=10,
+            justify="center",
         )
-        num_players_entry.grid(row=0, column=0, padx=10)
+        num_players_entry.grid(row=2, column=0, pady=5)
+
+        # Número total de partidas (rondas)
+        ttk.Label(self.main_frame, text="Número total de partidas:").grid(
+            row=3, column=0, pady=10
+        )
+        self.num_rounds_var = tk.StringVar()
+        num_rounds_entry = ttk.Entry(
+            self.main_frame,
+            textvariable=self.num_rounds_var,
+            width=10,
+            justify="center",
+        )
+        num_rounds_entry.grid(row=4, column=0, pady=5)
 
         start_button = ttk.Button(
-            entry_frame, text="Comenzar", command=self.start_player_registration
+            self.main_frame,
+            text="Comenzar registro",
+            command=self.start_player_registration,
         )
-        start_button.grid(row=0, column=1, padx=10)
+        start_button.grid(row=5, column=0, pady=20)
 
     def start_player_registration(self):
-        """Iniciar el registro de jugadores"""
+        """Inicia el proceso de registro de jugadores y define el total de partidas."""
         try:
             num_players = int(self.num_players_var.get())
-            if num_players < 1 or num_players > 5:
+            num_rounds = int(self.num_rounds_var.get())
+            if not (1 <= num_players <= 5):
                 messagebox.showerror(
                     "Error", "El número de jugadores debe estar entre 1 y 5"
                 )
                 return
+            if num_rounds < 1:
+                messagebox.showerror(
+                    "Error", "El número de partidas debe ser al menos 1"
+                )
+                return
 
-            # Limpiar la pantalla
+            self.total_rounds = num_rounds
+            self.num_players = num_players
+            self.current_player_registration = 0
+
+            # Limpiar pantalla para comenzar el registro individual de jugadores
             for widget in self.main_frame.winfo_children():
                 widget.destroy()
-
-            self.current_player = 0
-            self.num_players = num_players
             self.register_next_player()
 
         except ValueError:
-            messagebox.showerror("Error", "Por favor ingrese un número válido")
+            messagebox.showerror(
+                "Error", "Por favor ingrese números válidos para jugadores y partidas"
+            )
 
     def register_next_player(self):
-        """Registrar el siguiente jugador"""
-        if self.current_player < self.num_players:
-            # Título
-            ttk.Label(
-                self.main_frame,
-                text=f"Registro del Ninja {self.current_player + 1}",
-                style="Title.TLabel",
-            ).grid(row=0, column=0, pady=20)
+        """Registra a cada jugador (sólo se pide el nombre)."""
+        if self.current_player_registration < self.num_players:
+            for widget in self.main_frame.winfo_children():
+                widget.destroy()
 
-            # Frame para el formulario
+            title_label = ttk.Label(
+                self.main_frame,
+                text=f"Registro del Ninja {self.current_player_registration + 1}",
+                style="Title.TLabel",
+            )
+            title_label.grid(row=0, column=0, pady=20)
+
             form_frame = ttk.Frame(self.main_frame)
             form_frame.grid(row=1, column=0, pady=20)
 
-            # Nombre
             ttk.Label(form_frame, text="Nombre del Ninja:").grid(
                 row=0, column=0, pady=5, padx=5
             )
@@ -156,172 +160,235 @@ class TurtleRaceGUI:
             name_entry = ttk.Entry(form_frame, textvariable=name_var, width=20)
             name_entry.grid(row=0, column=1, pady=5, padx=5)
 
-            # Color
-            ttk.Label(form_frame, text="Elige tu Tortuga:").grid(
-                row=1, column=0, pady=5, padx=5
-            )
-            color_var = tk.StringVar()
-            color_combo = ttk.Combobox(
-                form_frame, textvariable=color_var, width=17, state="readonly"
-            )
-            color_combo["values"] = [
-                k for k, v in self.color_mapping.items() if v in self.available_colors
-            ]
-            color_combo.grid(row=1, column=1, pady=5, padx=5)
+            ttk.Button(
+                self.main_frame,
+                text="Registrar Ninja",
+                command=lambda: self.register_player(name_var.get()),
+            ).grid(row=2, column=0, pady=20)
+        else:
+            # Iniciar el bucle de partidas
+            self.start_game_loop()
 
-            # Apuesta
+    def register_player(self, name):
+        """Guarda el jugador con un balance inicial de 500 monedas."""
+        if not name:
+            messagebox.showerror("Error", "El nombre no puede estar vacío")
+            return
+        if name in self.players:
+            messagebox.showerror("Error", "El nombre ya fue registrado")
+            return
+
+        self.players[name] = {"balance": 500}
+        self.players_order.append(name)
+        self.current_player_registration += 1
+        self.register_next_player()
+
+    def start_game_loop(self):
+        """Inicia el juego en bucle de rondas."""
+        self.current_round = 0
+        self.play_next_round()
+
+    def play_next_round(self):
+        """
+        Comprueba si se deben jugar más rondas: se continúa si
+          - Quedan rondas por jugar, y
+          - Existe al menos un jugador con balance positivo.
+        """
+        active_players = [
+            p for p in self.players_order if self.players[p]["balance"] > 0
+        ]
+        if self.current_round < self.total_rounds and active_players:
+            self.current_round += 1
+            messagebox.showinfo(
+                "Nueva Ronda",
+                f"Comenzando la ronda {self.current_round} de {self.total_rounds}",
+            )
+            self.setup_round_betting(active_players)
+        else:
+            self.show_final_results()
+
+    def setup_round_betting(self, active_players):
+        """
+        Prepara la apuesta para la ronda:
+          - Se reinician las tortugas disponibles para la selección.
+          - Se recorren los jugadores activos uno a uno para que ingresen su apuesta y elijan su tortuga.
+        """
+        self.available_turtles_round = list(self.color_mapping.keys())
+        self.active_players_round = active_players
+        self.round_player_index = 0
+        self.current_round_bets = (
+            {}
+        )  # { jugador: { "bet": tortuga, "bet_amount": int } }
+        self.register_next_round_bet()
+
+    def register_next_round_bet(self):
+        """Recolecta la apuesta del siguiente jugador activo para esta ronda."""
+        if self.round_player_index < len(self.active_players_round):
+            for widget in self.main_frame.winfo_children():
+                widget.destroy()
+
+            player_name = self.active_players_round[self.round_player_index]
+            balance = self.players[player_name]["balance"]
+
+            title_label = ttk.Label(
+                self.main_frame,
+                text=f"Apuesta del Ninja: {player_name}",
+                style="Title.TLabel",
+            )
+            title_label.grid(row=0, column=0, pady=20)
+
+            info_label = ttk.Label(
+                self.main_frame, text=f"Balance actual: {balance} monedas"
+            )
+            info_label.grid(row=1, column=0, pady=10)
+
+            form_frame = ttk.Frame(self.main_frame)
+            form_frame.grid(row=2, column=0, pady=20)
+
+            # Selección de tortuga (se muestran sólo las disponibles para esta ronda)
+            ttk.Label(form_frame, text="Elige tu Tortuga:").grid(
+                row=0, column=0, pady=5, padx=5
+            )
+            turtle_var = tk.StringVar()
+            turtle_combo = ttk.Combobox(
+                form_frame, textvariable=turtle_var, width=20, state="readonly"
+            )
+            turtle_combo["values"] = self.available_turtles_round
+            turtle_combo.grid(row=0, column=1, pady=5, padx=5)
+
+            # Monto de la apuesta
             ttk.Label(form_frame, text="Cantidad a apostar:").grid(
-                row=2, column=0, pady=5, padx=5
+                row=1, column=0, pady=5, padx=5
             )
             bet_var = tk.StringVar()
             bet_entry = ttk.Entry(form_frame, textvariable=bet_var, width=20)
-            bet_entry.grid(row=2, column=1, pady=5, padx=5)
-
-            # Mostrar balance inicial
-            ttk.Label(
-                form_frame, text="Balance inicial: 500 monedas", foreground="#FFD700"
-            ).grid(row=3, column=0, columnspan=2, pady=10)
+            bet_entry.grid(row=1, column=1, pady=5, padx=5)
 
             ttk.Button(
                 self.main_frame,
-                text="¡Unirse a la carrera!",
-                command=lambda: self.register_player(
-                    name_var.get(), color_var.get(), bet_var.get()
+                text="Registrar Apuesta",
+                command=lambda: self.register_player_bet(
+                    player_name, turtle_var.get(), bet_var.get()
                 ),
-            ).grid(row=2, column=0, pady=20)
+            ).grid(row=3, column=0, pady=20)
         else:
-            self.start_race()
+            # Una vez recolectadas todas las apuestas, se inicia la carrera de la ronda
+            self.start_round_race()
 
-    def register_player(self, name, color_esp, bet_amount):
-        """Registrar un jugador"""
-        if not name or not color_esp or not bet_amount:
+    def register_player_bet(self, player_name, turtle_choice, bet_amount):
+        """Valida y registra la apuesta de un jugador para la ronda actual."""
+        if not turtle_choice or not bet_amount:
             messagebox.showerror("Error", "Por favor complete todos los campos")
             return
-
         try:
             bet = int(bet_amount)
             if bet <= 0:
                 messagebox.showerror("Error", "La apuesta debe ser mayor a 0")
                 return
-            if bet > 500:
+            if bet > self.players[player_name]["balance"]:
                 messagebox.showerror(
-                    "Error", "La apuesta no puede superar tu balance inicial de 500"
+                    "Error",
+                    f"La apuesta no puede superar tu balance actual de {self.players[player_name]['balance']} monedas",
                 )
                 return
         except ValueError:
             messagebox.showerror("Error", "La apuesta debe ser un número válido")
             return
 
-        color = self.color_mapping[color_esp]
-        if color not in self.available_colors:
-            messagebox.showerror("Error", "Tortuga no disponible")
+        if turtle_choice not in self.available_turtles_round:
+            messagebox.showerror("Error", "Tortuga no disponible o ya elegida")
             return
 
-        self.players[name] = {"balance": 500, "bet": color, "bet_amount": bet}
-        self.available_colors.remove(color)
-        self.current_player += 1
+        # Se guarda la apuesta del jugador
+        self.current_round_bets[player_name] = {"bet": turtle_choice, "bet_amount": bet}
+        # Se elimina la tortuga elegida de las disponibles para evitar duplicados en la misma ronda
+        self.available_turtles_round.remove(turtle_choice)
+        self.round_player_index += 1
+        self.register_next_round_bet()
 
-        # Limpiar la pantalla y continuar con el siguiente jugador
-        for widget in self.main_frame.winfo_children():
-            widget.destroy()
-
-        self.register_next_player()
-
-    def start_race(self):
-        """Iniciar la carrera de tortugas"""
+    def start_round_race(self):
+        """Ejecuta la carrera de tortugas de la ronda, actualiza balances y muestra los resultados."""
+        # Ocultar la ventana principal mientras se ejecuta la carrera con turtle
         self.root.withdraw()
 
-        # Configurar pantalla de turtle
+        # Crear (o reutilizar) la pantalla de turtle y limpiarla de dibujos previos
         screen = turtle.Screen()
-        screen.title("¡Carrera de Tortugas Ninja!")
-        screen.bgcolor("#2E8B57")  # Fondo verde
+        screen.clearscreen()  # Limpia la pantalla sin cerrar la ventana
+        screen.bgcolor("#2E8B57")
+        screen.title(f"Ronda {self.current_round} - Carrera de Tortugas Ninja")
+        screen.setup(width=800, height=600)
 
-        # Dibujar línea de meta
+        # Dibujar la línea de meta
         finish_line = turtle.Turtle()
         finish_line.hideturtle()
         finish_line.penup()
-        finish_line.goto(screen.window_width() / 2 - 20, 150)
+        finish_line.goto(screen.window_width() / 2 - 40, 150)
         finish_line.pendown()
         finish_line.right(90)
         finish_line.pensize(3)
         finish_line.color("white")
         finish_line.forward(300)
 
-        # Diccionario para nombres de tortugas
-        ninja_names = {
-            "#0000CD": "Leonardo (Azul)",
-            "#FF0000": "Raphael (Rojo)",
-            "#FFA500": "Michelangelo (Naranja)",
-            "#800080": "Donatello (Morado)",
-            "#8B4513": "Splinter (Marrón)",
-        }
-
-        # Obtener colores únicos seleccionados
-        selected_colors = set(
-            player_info["bet"] for player_info in self.players.values()
-        )
-
-        # Crear las tortugas seleccionadas
-        turtles = []
-        starting_pos = -screen.window_width() / 2 + 20
-        spacing = 300 / (len(selected_colors) + 1)
-
-        for i, color in enumerate(selected_colors):
-            new_turtle = turtle.Turtle(shape="turtle")
-            new_turtle.color(color)
-            new_turtle.shapesize(2, 2)
-            new_turtle.penup()
+        # Crear las tortugas participantes según las apuestas de la ronda
+        race_turtles = []
+        spacing = 300 / (len(self.current_round_bets) + 1)
+        starting_x = -screen.window_width() / 2 + 40
+        for i, (player_name, bet_info) in enumerate(self.current_round_bets.items()):
+            turtle_name = bet_info["bet"]
+            turtle_color = self.color_mapping[turtle_name]
+            racer = turtle.Turtle(shape="turtle")
+            racer.color(turtle_color)
+            racer.shapesize(2, 2)
+            racer.penup()
             y_pos = 100 - (i * spacing)
-            new_turtle.goto(starting_pos, y_pos)
-            # Guardamos la tortuga junto con su nombre
-            turtles.append((ninja_names[color], new_turtle))
+            racer.goto(starting_x, y_pos)
+            race_turtles.append((turtle_name, racer))
 
-        # Carrera
-        winner_name = None
-        winner_turtle = None
-
-        while winner_name is None:
-            for name, t in turtles:
-                t.forward(random.randint(1, 10))
-                if t.xcor() >= screen.window_width() / 2 - 20:
-                    winner_name = name
-                    winner_turtle = t
+        # Carrera: mover cada tortuga aleatoriamente hasta cruzar la meta
+        winner_turtle_name = None
+        while not winner_turtle_name:
+            for t_name, racer in race_turtles:
+                racer.forward(random.randint(1, 10))
+                if racer.xcor() >= screen.window_width() / 2 - 40:
+                    winner_turtle_name = t_name
                     break
-            if winner_name:
-                break
 
-        # Mostrar resultados
-        results = "Resultados de la Carrera:\n\n"
-        results += f"🏆 ¡{winner_name} HA GANADO LA CARRERA! 🏆\n\n"
-
-        # Primero mostramos los ganadores
-        results += "🌟 GANADORES 🌟\n"
-        has_winners = False
-        for player_name, player_info in self.players.items():
-            tortuga_apostada = ninja_names[player_info["bet"]]
-            if tortuga_apostada == winner_name:
-                has_winners = True
-                winnings = player_info["bet_amount"] * 2
-                total_winnings = player_info["bet_amount"] + winnings
-                player_info["balance"] += winnings
-                results += f"¡{player_name} apostó a {winner_name} y ganó {total_winnings} monedas!\n"
+        # Actualizar resultados y balances
+        results = f"Resultados de la Ronda {self.current_round}:\n\n"
+        results += f"🏆 ¡{winner_turtle_name} ha ganado la carrera! 🏆\n\n"
+        for player_name, bet_info in self.current_round_bets.items():
+            bet_amount = bet_info["bet_amount"]
+            chosen_turtle = bet_info["bet"]
+            if chosen_turtle == winner_turtle_name:
+                self.players[player_name]["balance"] += bet_amount
                 results += (
-                    f"(Apuesta: {player_info['bet_amount']} + Premio: {winnings})\n"
+                    f"¡{player_name} apostó a {winner_turtle_name} y ganó {bet_amount} monedas! "
+                    f"Nuevo balance: {self.players[player_name]['balance']}\n"
                 )
-                results += f"Balance final: {player_info['balance']} monedas\n\n"
+            else:
+                self.players[player_name]["balance"] -= bet_amount
+                results += (
+                    f"{player_name} apostó a {chosen_turtle} y perdió {bet_amount} monedas. "
+                    f"Nuevo balance: {self.players[player_name]['balance']}\n"
+                )
 
-        # Luego mostramos los perdedores
-        results += "❌ PERDEDORES ❌\n"
-        for player_name, player_info in self.players.items():
-            tortuga_apostada = ninja_names[player_info["bet"]]
-            if tortuga_apostada != winner_name:
-                player_info["balance"] -= player_info["bet_amount"]
-                results += f"{player_name} apostó a {tortuga_apostada} y perdió {player_info['bet_amount']} monedas\n"
-                results += f"Balance final: {player_info['balance']} monedas\n\n"
+        messagebox.showinfo("Fin de la Ronda", results)
 
-        messagebox.showinfo("¡Fin de la Carrera!", results)
-        screen.bye()
-        self.root.quit()
+        # En lugar de cerrar la ventana con screen.bye(), se limpia la pantalla para poder reutilizarla
+        screen.clear()
+        self.root.deiconify()
+        self.play_next_round()
+
+    def show_final_results(self):
+        """Muestra los resultados finales y cierra la aplicación."""
+        for widget in self.main_frame.winfo_children():
+            widget.destroy()
+        final_results = "Resultados Finales:\n\n"
+        for player_name in self.players_order:
+            balance = self.players[player_name]["balance"]
+            final_results += f"{player_name}: {balance} monedas\n"
+        messagebox.showinfo("Juego Terminado", final_results)
+        self.root.destroy()
 
 
 def main():
