@@ -1,0 +1,7 @@
+# Versión mínima de Python requerida
+python>=3.7
+
+# Módulos utilizados (incluidos en la biblioteca estándar)
+# - turtle
+# - tkinter
+# - random 

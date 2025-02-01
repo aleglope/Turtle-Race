@@ -1,99 +1,108 @@
-# Turtle Race Game
+# 🐢 Carrera de Tortugas Ninja
 
-## Description
+## 📝 Descripción
 
-This is a simple turtle racing game implemented in Python using the `turtle` module. Players can bet on a turtle of a specific color. The first turtle to reach the end of the screen is the winner, and players who bet on that turtle win coins.
+Este es un emocionante juego de carreras inspirado en las Tortugas Ninja, implementado en Python. Los jugadores pueden apostar por su tortuga ninja favorita y ver quién llega primero a la meta. El juego cuenta con una interfaz gráfica moderna y temática, utilizando los módulos `turtle` y `tkinter`.
 
-## Requirements
+## 🎮 Características
 
-- Python 3.x
-- `turtle` module (included in the standard Python library)
+- Interfaz gráfica moderna con tema de las Tortugas Ninja
+- Sistema de apuestas personalizado
+- Soporte para 1-5 jugadores
+- Animaciones de carrera en tiempo real
+- Sistema de balance y ganancias
+- Carreras dinámicas que se ajustan al número de participantes
 
-## How to Play
+## 🔧 Requisitos
 
-1. **Initial Setup:**
-   - When you run the script, you will be asked for the number of players.
-   - Each player starts with an initial balance of 500 coins.
+- Python 3.7 o superior
+- Módulos de la biblioteca estándar:
+  - turtle
+  - tkinter
+  - random
 
-2. **Placing Bets:**
-   - Each player will bet 100 coins on a turtle of a specific color.
-   - The available colors to bet on are: red, green, blue, orange, and purple.
-   - If only one color is left and a player hasn't placed their bet, that color will be automatically assigned to the player.
+## 📦 Instalación
 
-3. **Starting the Race:**
-   - Once all players have placed their bets, the race begins automatically.
-   - The turtles will move forward randomly in each turn.
-
-4. **Determining the Winner:**
-   - The first turtle to cross the finish line is declared the winner.
-   - Players who bet on the winning turtle receive a payout of 5:1 on their bet.
-
-5. **Results:**
-   - The race results will be displayed in the console, including the updated balance for each player.
-   - The game window will close when you click on it.
-
-## Running the Game
-
-To run the game, simply execute the Python script in your terminal or development environment:
+1. Clona el repositorio o descarga los archivos
+2. Asegúrate de tener Python 3.7 o superior instalado
+3. No se requieren dependencias adicionales
 
 ```bash
-python turtle_race.py
+# Verificar versión de Python
+python --version
+
+# Ejecutar el juego
+python turtle-race.py
 ```
 
-## Additional Notes
+## 🎯 Cómo Jugar
 
-- **Customization:** You can customize the turtle colors, bets, and other settings according to your preferences.
-- **Learning:** This game is a great way to learn about graphical programming with `turtle` and basic Python concepts such as loops, conditionals, and functions.
+1. **Inicio del Juego:**
 
-Enjoy the game and may the best turtle win!
+   - Ejecuta el programa
+   - Selecciona el número de jugadores (1-5)
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+2. **Registro de Jugadores:**
 
-# Juego de Carrera de Tortugas
+   - Cada jugador ingresa su nombre
+   - Elige su tortuga ninja favorita
+   - Establece la cantidad a apostar (máximo 500 monedas)
 
-## Descripción
+3. **Tortugas Disponibles:**
 
-Este es un sencillo juego de carreras de tortugas implementado en Python utilizando el módulo `turtle`. Los jugadores pueden apostar en una tortuga de un color específico. La primera tortuga en llegar al final de la pantalla es la ganadora, y los jugadores que apostaron en esa tortuga ganan monedas.
+   - Leonardo (Azul) 🔵
+   - Raphael (Rojo) ❤️
+   - Michelangelo (Naranja) 🟠
+   - Donatello (Morado) 💜
+   - Splinter (Marrón) 🟤
 
-## Requisitos
+4. **Sistema de Apuestas:**
 
-- Python 3.x
-- Módulo `turtle` (incluido en la biblioteca estándar de Python)
+   - Balance inicial: 500 monedas
+   - Apuesta mínima: 1 moneda
+   - Multiplicador de ganancia: x3
 
-## Cómo Jugar
+5. **La Carrera:**
 
-1. **Configuración Inicial:**
-   - Al ejecutar el script, se solicitará el número de jugadores.
-   - Cada jugador comenzará con un saldo inicial de 500 monedas.
+   - Las tortugas seleccionadas compiten automáticamente
+   - El movimiento es aleatorio en cada turno
+   - La primera tortuga en llegar a la línea de meta gana
 
-2. **Realizar Apuestas:**
-   - Cada jugador apostará 100 monedas en una tortuga de un color específico.
-   - Los colores disponibles para apostar son: rojo, verde, azul, naranja y morado.
-   - Si solo queda un color y un jugador no ha realizado su apuesta, ese color se asignará automáticamente al jugador.
+6. **Resultados:**
+   - Se muestran las ganancias o pérdidas de cada jugador
+   - Se actualiza el balance final de cada participante
 
-3. **Inicio de la Carrera:**
-   - Una vez que todos los jugadores hayan realizado sus apuestas, la carrera comenzará automáticamente.
-   - Las tortugas se moverán hacia adelante de forma aleatoria en cada turno.
+## 💰 Sistema de Ganancias
 
-4. **Determinar el Ganador:**
-   - La primera tortuga en cruzar la línea de meta será declarada ganadora.
-   - Los jugadores que apostaron en la tortuga ganadora recibirán un pago de 5:1 por su apuesta.
+- **Victoria:** Tu apuesta x 3
+- **Derrota:** Pierdes la cantidad apostada
 
-5. **Resultados:**
-   - Los resultados de la carrera se mostrarán en la consola, incluyendo el saldo actualizado de cada jugador.
-   - La ventana del juego se cerrará al hacer clic en ella.
+## 🎨 Características Visuales
 
-## Ejecutar el Juego
+- Interfaz con tema verde de las Tortugas Ninja
+- Línea de meta visible
+- Tortugas de tamaño aumentado para mejor visibilidad
+- Espaciado dinámico según el número de participantes
 
-Para ejecutar el juego, simplemente ejecuta el script Python en tu terminal o entorno de desarrollo:
+## 📝 Notas Adicionales
 
-```bash
-python turtle_race.py
-```
+- Solo participan en la carrera las tortugas seleccionadas por los jugadores
+- El espaciado entre tortugas se ajusta automáticamente
+- La interfaz está completamente en español
+- Incluye mensajes temáticos como "¡Cowabunga!"
 
-## Notas Adicionales
+## 🤝 Contribuciones
 
-- **Personalización:** Puedes personalizar los colores de las tortugas, las apuestas y otras configuraciones según tus preferencias.
-- **Aprendizaje:** Este juego es una excelente manera de aprender sobre programación gráfica con `turtle` y conceptos básicos de Python como bucles, condicionales y funciones.
+¡Las contribuciones son bienvenidas! Si tienes ideas para mejorar el juego, no dudes en:
 
-¡Disfruta del juego y que gane la mejor tortuga!
+1. Hacer un fork del repositorio
+2. Crear una rama para tu característica
+3. Enviar un pull request
+
+## ⚖️ Licencia
+
+Este proyecto está disponible como código abierto bajo la licencia MIT.
+
+---
+
+¡Cowabunga! 🐢 ¡Que gane la mejor tortuga ninja!
